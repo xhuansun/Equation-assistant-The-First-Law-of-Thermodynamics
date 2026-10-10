@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>热力学第一定律公式助手</title>
+<style>
+:root{
+  --bg:#f5f7fa;--card:#fff;--line:#e3e8ef;--txt:#1f2937;--sub:#6b7280;
+  --p1:#2563eb;--ok:#059669;--warn:#d97706;--r:12px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--txt);line-height:1.6;-webkit-text-size-adjust:100%}
+header{background:linear-gradient(135deg,#2563eb,#0891b2);color:#fff;padding:18px 16px 14px}
+header h1{margin:0;font-size:19px;letter-spacing:.5px}
+header p{margin:4px 0 0;font-size:12px;opacity:.85}
+nav{display:flex;overflow-x:auto;background:#fff;border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:10}
+nav button{flex:1 0 auto;padding:12px 14px;border:0;background:none;font-size:14px;
+  color:var(--sub);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+nav button.on{color:var(--p1);border-bottom-color:var(--p1);font-weight:600}
+main{padding:14px;max-width:900px;margin:0 auto;padding-bottom:80px}
+section{display:none}
+section.on{display:block}
+input,select{font:inherit;padding:8px 10px;border:1px solid var(--line);
+  border-radius:8px;background:#fff;color:var(--txt);width:100%}
+.search{margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:14px;margin-bottom:12px}
+.card h3{margin:0 0 8px;font-size:15px}
+.expr{font-family:"Cambria Math","Times New Roman",serif;font-size:19px;color:var(--p1);
+  background:#eff6ff;border-radius:8px;padding:10px;text-align:center;margin:8px 0;
+  overflow-x:auto;line-height:1.9}
+.cond{font-size:12px;color:var(--sub)}
+.vars{font-size:13px;margin:8px 0 0;padding-left:18px}
+.vars li{list-style:disc}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;
+  background:#eef2ff;color:#4338ca;margin-bottom:6px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{border:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+th{background:#f1f5f9;font-weight:600;white-space:nowrap}
+td.k{background:#f8fafc;font-weight:600;white-space:nowrap;width:56px}
+button.btn{padding:10px 18px;border:0;border-radius:8px;background:var(--p1);color:#fff;
+  font-size:15px;cursor:pointer;margin-top:12px}
+button.btn:active{opacity:.8}
+button.btn.ghost{background:#fff;color:var(--p1);border:1px solid var(--p1)}
+.hint{font-size:12px;color:var(--sub);margin-top:6px}
+.pill{display:inline-block;padding:6px 14px;border-radius:999px;border:1px solid var(--line);
+  background:#fff;font-size:13px;cursor:pointer;margin:0 6px 8px 0}
+.pill.on{background:var(--p1);color:#fff;border-color:var(--p1)}
+.flash{background:#fff;border:1px solid var(--line);border-radius:var(--r);
+  padding:26px 16px;text-align:center;min-height:150px;display:flex;
+  flex-direction:column;justify-content:center}
+.flash .q{font-size:17px;font-weight:600}
+.flash .a{margin-top:14px;font-size:20px;font-family:"Cambria Math",serif;
+  color:var(--p1);display:none}
+.flash.show .a{display:block}
+.trap li{margin-bottom:10px}
+.trap b{color:#dc2626}
+.groupTitle{font-size:13px;font-weight:700;color:var(--p1);
+  margin:18px 0 8px;padding-left:8px;border-left:3px solid var(--p1)}
+
+/* ===== B站关注引导 ===== */
+.bili-footer{
+  background:#fff;border-top:1px solid var(--line);
+  padding:20px 16px 24px;text-align:center;
+  margin-top:20px;
+}
+.bili-footer .title{
+  font-size:14px;color:var(--sub);margin:0 0 10px;
+}
+.bili-footer .title b{color:#2563eb}
+.bili-footer .qr{
+  width:130px;height:130px;border-radius:10px;
+  border:1px solid var(--line);padding:6px;background:#fff;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
+.bili-footer .scan{
+  font-size:12px;color:var(--sub);margin:8px 0 0;
+}
+.bili-float{
+  position:fixed;right:14px;bottom:14px;z-index:99;
+  display:flex;align-items:center;gap:6px;
+  background:#2563eb;color:#fff;
+  padding:9px 16px 9px 12px;border-radius:999px;
+  font-size:13px;text-decoration:none;
+  box-shadow:0 4px 14px rgba(37,99,235,.35);
+  transition:transform .15s, box-shadow .15s;
+}
+.bili-float:active{
+  transform:scale(.95);
+  box-shadow:0 2px 8px rgba(37,99,235,.3);
+}
+.bili-float svg{width:16px;height:16px;fill:#fff;flex-shrink:0}
+@media(max-width:480px){
+  .bili-footer .qr{width:110px;height:110px}
+  .bili-float{right:10px;bottom:10px;padding:8px 14px 8px 10px;font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>热力学第一定律公式助手</h1>
+  <p>物理化学 · 第一定律 ｜ 35 条公式速查 · 11 过程速判 · 22 记忆卡 · 17 易错点</p>
+</header>
+
+<nav>
+  <button class="on" data-tab="cards">公式速查</button>
+  <button data-tab="proc">过程速判</button>
+  <button data-tab="quiz">记忆卡</button>
+  <button data-tab="trap">易错点</button>
+</nav>
+
+<main>
+  <section id="cards" class="on">
+    <input class="search" id="q" placeholder="搜索：ΔU / 焓 / 绝热 / 相变 / 化学反应 / 节流 …">
+    <div id="cardList"></div>
+  </section>
+
+  <section id="proc">
+    <p class="hint">选择过程类型（理想气体、<i>W</i>′ = 0）：</p>
+    <div id="procPills"></div>
+    <div id="procResult"></div>
+  </section>
+
+  <section id="quiz">
+    <div class="flash" id="quizCard"></div>
+    <p class="hint" id="quizPos" style="text-align:center"></p>
+    <div style="text-align:center">
+      <button class="btn" id="quizShow">显示答案</button>
+      <button class="btn ghost" id="quizNext">下一题</button>
+      <button class="btn ghost" id="quizShuffle">打 乱</button>
+    </div>
+  </section>
+
+  <section id="trap">
+    <div class="card">
+      <h3>最容易丢分的 17 个点</h3>
+      <ul class="trap">
+        <li><b>符号约定</b>：<i>ΔU</i> = <i>Q</i> + <i>W</i> 中 <i>W</i> 是「环境对系统做功」；若教材用「系统对外做功为正」，则写成 <i>ΔU</i> = <i>Q</i> − <i>W</i>。换教材先确认。</li>
+        <li><b><i>Q</i><sub>p</sub> = <i>ΔH</i> 有条件</b>：必须封闭系统、等压、且不做非体积功（<i>W</i>′ = 0，<i>W</i>′ 为非体积功）。有电功、表面功时不成立。</li>
+        <li><b><i>Q</i><sub>V</sub> = <i>ΔU</i> 有条件</b>：等容且 <i>W</i>′ = 0，缺一不可。</li>
+        <li><b>理想气体的 <i>ΔU</i>、<i>ΔH</i> 只看 <i>ΔT</i></b>：不管过程可逆与否、是否等温等压，直接用 <i>nC</i><sub>V,m</sub><i>ΔT</i>、<i>nC</i><sub>p,m</sub><i>ΔT</i>（热容视为常数）。</li>
+        <li><b>绝热 ≠ 可逆</b>：绝热不可逆过程不能用 <i>pV</i><sup><i>γ</i></sup> = 常数这一套方程，只能用 <i>Q</i> = 0 与 <i>ΔU</i> = <i>W</i> 联立求 <i>T</i>₂。</li>
+        <li><b>绝热不可逆的功</b>：若外压恒定，<i>W</i> = −<i>p</i><sub>外</sub>(<i>V</i>₂−<i>V</i>₁)，再令它等于 <i>nC</i><sub>V,m</sub>(<i>T</i>₂−<i>T</i>₁) 解出 <i>T</i>₂。</li>
+        <li><b><i>C</i><sub>p,m</sub> − <i>C</i><sub>V,m</sub> = <i>R</i> 只对理想气体成立</b>，凝聚相不适用。</li>
+        <li><b>等温可逆功要用系统压力积分</b>：<i>W</i> = −∫<i>p</i> d<i>V</i>，<i>p</i> = <i>nRT</i>/<i>V</i>，不是用外压。</li>
+        <li><b>恒外压功</b>：<i>W</i> = −<i>p</i><sub>外</sub><i>ΔV</i>，与系统内部压力无关；向真空膨胀 <i>W</i> = 0。</li>
+        <li><b>焓变与热力学能变的关系</b>：<i>ΔH</i> = <i>ΔU</i> + Δ(<i>pV</i>)。理想气体 Δ(<i>pV</i>) = Δ<i>n</i>(g)<i>RT</i>；凝聚相 Δ(<i>pV</i>) ≈ 0，故 <i>ΔH</i> ≈ <i>ΔU</i>。</li>
+        <li><b>基尔霍夫定律</b>：<i>ΔC</i><sub>p</sub> = Σ<i>ν</i><sub>B</sub><i>C</i><sub>p,m</sub>(B)，产物为正、反应物为负。</li>
+        <li><b>燃烧焓方向</b>：<i>Δ</i><sub>r</sub><i>H</i><sub>m</sub><sup>°</sup> = −Σ<i>ν</i><sub>B</sub><i>Δ</i><sub>c</sub><i>H</i><sub>m</sub><sup>°</sup>(B)，别漏负号。</li>
+        <li><b>节流膨胀是等焓不是等温</b>：理想气体 <i>μ</i><sub>J-T</sub> = 0 才是等温；真实气体一般会变温。</li>
+        <li><b>等温等容反应 <i>W</i> = 0，但 <i>Δ</i><sub>r</sub><i>H</i><sub>m</sub> ≠ <i>Δ</i><sub>r</sub><i>U</i><sub>m</sub></b>：必须用 <i>Δ</i><sub>r</sub><i>H</i><sub>m</sub> = <i>Δ</i><sub>r</sub><i>U</i><sub>m</sub> + <i>Δ</i><sub>r</sub>(<i>pV</i>) 换算，理想气体时 <i>Δ</i><sub>r</sub>(<i>pV</i>) = <i>RTΔ</i><sub>r</sub><i>n</i>(g)。</li>
+        <li><b>等温等压反应 <i>Δ</i><sub>r</sub><i>U</i><sub>m</sub> = <i>Δ</i><sub>r</sub><i>H</i><sub>m</sub> − <i>p</i><sub>外</sub><i>ΔV</i></b>：算热力学能变时别忘了扣掉体积功，气体反应时 <i>ΔV</i> ≈ <i>Δn</i>(g)<i>RT</i>/<i>p</i>。</li>
+        <li><b>不可逆相变的 <i>Q</i><sub>p</sub> ≠ <i>ΔH</i><sub>相变</sub></b>：<i>ΔH</i><sub>相变</sub> 只在相平衡温度下有意义；不可逆相变的 <i>ΔH</i> 需另设可逆途径计算，<i>ΔU</i> 用 <i>ΔU</i> = <i>Q</i> + <i>W</i> 求。</li>
+        <li><b>可逆相变必须在相平衡温度下发生</b>（如正常沸点、正常熔点、平衡蒸气压下），否则就是不可逆相变。</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<!-- ===== B站关注引导：底部 ===== -->
+<footer class="bili-footer">
+  <p class="title">
+    📺 觉得这个工具不错？欢迎关注 B 站
+    <b>@薛定谔的物化</b>
+  </p>
+  <a href="https://space.bilibili.com/661313072" target="_blank" rel="noopener">
+    <img class="qr"
+         src="https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=https%3A%2F%2Fspace.bilibili.com%2F661313072"
+         alt="B站 @薛定谔的物化 二维码">
+  </a>
+  <p class="scan">扫码或点击二维码关注 · 获取更多物理化学干货</p>
+</footer>
+
+<!-- ===== B站关注引导：右下角悬浮按钮 ===== -->
+<a class="bili-float"
+   href="https://space.bilibili.com/661313072"
+   target="_blank" rel="noopener">
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.511.556-2.765 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.356.124-.658.373-.907l.027-.027c.267-.249.573-.373.92-.373.347 0 .653.124.92.373L9.653 4.44c.071.071.134.142.187.213h4.267a.836.836 0 0 1 .16-.213l2.853-2.747c.267-.249.573-.373.92-.373.347 0 .662.151.929.4.267.249.391.551.391.907 0 .355-.124.657-.373.906zM5.333 7.24c-.746.018-1.373.276-1.88.773-.506.498-.769 1.13-.786 1.894v7.52c.017.764.28 1.395.786 1.893.507.498 1.134.756 1.88.773h13.334c.746-.017 1.373-.275 1.88-.773.506-.498.769-1.129.786-1.893v-7.52c-.017-.765-.28-1.396-.786-1.894-.507-.497-1.134-.755-1.88-.773zM8 11.107c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c0-.373.129-.689.386-.947.258-.257.574-.386.947-.386zm8 0c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c.017-.391.15-.711.4-.96.249-.249.56-.373.933-.373z"/>
+  </svg>
+  关注 B 站
+</a>
+
+<script>
+/* ==================== 1. 公式数据（仅第一定律，共 35 条） ==================== */
+const FORMULAS = [
+/* ---------- A. 基本概念与定义（6 条） ---------- */
+{topic:'A · 基本概念',title:'热力学第一定律（封闭系统）',
+ expr:'<i>ΔU</i> = <i>Q</i> + <i>W</i>',
+ cond:'封闭系统；<i>W</i> 为环境对系统做的功（IUPAC 规定）',
+ vars:[['<i>ΔU</i>','热力学能变，状态函数'],['<i>Q</i>','热量，系统吸热为正'],['<i>W</i>','功，环境对系统做功为正']],
+ note:''},
+
+{topic:'A · 基本概念',title:'热力学第一定律（微分形式）',
+ expr:'d<i>U</i> = <i>δQ</i> + <i>δW</i>',
+ cond:'封闭系统微小过程',
+ vars:[['<i>δ</i>','表示不是全微分，与路径有关'],['d','表示全微分，与路径无关']],
+ note:'<i>U</i> 是状态函数，<i>Q</i> 和 <i>W</i> 不是状态函数。'},
+
+{topic:'A · 基本概念',title:'体积功定义',
+ expr:'<i>δW</i> = −<i>p</i><sub>外</sub>d<i>V</i>，　<i>W</i> = −∫<i>p</i><sub>外</sub>d<i>V</i>',
+ cond:'封闭系统；<i>p</i><sub>外</sub> 为外压（环境压力）',
+ vars:[['<i>p</i><sub>外</sub>','外压']],
+ note:'可逆时 <i>p</i><sub>外</sub> = <i>p</i>（系统压力），此时 |<i>W</i>| 最大，即系统做功最多。'},
+
+{topic:'A · 基本概念',title:'焓的定义',
+ expr:'<i>H</i> = <i>U</i> + <i>pV</i>，　<i>ΔH</i> = <i>ΔU</i> + Δ(<i>pV</i>)',
+ cond:'任何封闭系统，定义式',
+ vars:[['<i>H</i>','焓，状态函数，绝对值未知']],
+ note:'理想气体 Δ(<i>pV</i>) = <i>nRΔT</i>；凝聚相 Δ(<i>pV</i>) ≈ 0，故 <i>ΔH</i> ≈ <i>ΔU</i>。'},
+
+{topic:'A · 基本概念',title:'热容的定义',
+ expr:'<i>C</i><sub>V</sub> = (∂<i>U</i>/∂<i>T</i>)<sub>V</sub>，　<i>C</i><sub>p</sub> = (∂<i>H</i>/∂<i>T</i>)<sub>p</sub>',
+ cond:'封闭系统，定义式',
+ vars:[['<i>C</i><sub>V</sub>','定容热容'],['<i>C</i><sub>p</sub>','定压热容']],
+ note:'热容本身也是状态函数（因为是 <i>U</i>、<i>H</i> 对 <i>T</i> 的偏导）。'},
+
+{topic:'A · 基本概念',title:'等容热与等压热',
+ expr:'<i>Q</i><sub>V</sub> = <i>ΔU</i>　（等容，<i>W</i>′ = 0）<br><i>Q</i><sub>p</sub> = <i>ΔH</i>　（等压，<i>W</i>′ = 0）',
+ cond:'封闭系统、不做非体积功（<i>W</i>′ = 0，<i>W</i>′ 为非体积功）',
+ vars:[['<i>Q</i><sub>V</sub>','等容热效应'],['<i>Q</i><sub>p</sub>','等压热效应']],
+ note:'这是量热实验测 <i>ΔU</i>、<i>ΔH</i> 的依据。'},
+
+/* ---------- B. 理想气体（6 条） ---------- */
+{topic:'B · 理想气体',title:'理想气体状态方程',
+ expr:'<i>pV</i> = <i>nRT</i>',
+ cond:'理想气体',
+ vars:[['<i>R</i>','8.314 J·K⁻¹·mol⁻¹']],
+ note:'低压高温下真实气体近似成立。'},
+
+{topic:'B · 理想气体',title:'理想气体的 <i>ΔU</i>',
+ expr:'<i>ΔU</i> = <i>nC</i><sub>V,m</sub><i>ΔT</i>',
+ cond:'理想气体，任意过程（含不可逆）；热容视为常数',
+ vars:[['<i>ΔT</i>','<i>T</i>₂ − <i>T</i>₁']],
+ note:'理想气体的 <i>U</i> 只与 <i>T</i> 有关，所以不管过程可逆与否都能直接套。'},
+
+{topic:'B · 理想气体',title:'理想气体的 <i>ΔH</i>',
+ expr:'<i>ΔH</i> = <i>nC</i><sub>p,m</sub><i>ΔT</i>',
+ cond:'理想气体，任意过程；热容视为常数',
+ vars:[['<i>C</i><sub>p,m</sub>','摩尔定压热容']],
+ note:'与 <i>ΔU</i> 一样只依赖于 <i>ΔT</i>，过程路径无关。'},
+
+{topic:'B · 理想气体',title:'迈耶公式',
+ expr:'<i>C</i><sub>p,m</sub> − <i>C</i><sub>V,m</sub> = <i>R</i>',
+ cond:'理想气体',
+ vars:[],
+ note:'单原子：<i>C</i><sub>V,m</sub> = 1.5<i>R</i>，<i>C</i><sub>p,m</sub> = 2.5<i>R</i>，<i>γ</i> = 5/3；双原子：<i>C</i><sub>V,m</sub> = 2.5<i>R</i>，<i>C</i><sub>p,m</sub> = 3.5<i>R</i>，<i>γ</i> = 7/5。'},
+
+{topic:'B · 理想气体',title:'热容比（绝热指数）',
+ expr:'<i>γ</i> = <i>C</i><sub>p,m</sub> / <i>C</i><sub>V,m</sub>',
+ cond:'理想气体',
+ vars:[],
+ note:'<i>γ</i> 恒大于 1。单原子 1.67，双原子 1.40。'},
+
+{topic:'B · 理想气体',title:'理想气体等温过程',
+ expr:'<i>ΔU</i> = 0，<i>ΔH</i> = 0，<i>Q</i> = −<i>W</i>',
+ cond:'理想气体、等温',
+ vars:[],
+ note:'等温过程中热与功完全抵消，能量不积累。'},
+
+/* ---------- C. 过程功与热（8 条） ---------- */
+{topic:'C · 过程功热',title:'恒外压体积功',
+ expr:'<i>W</i> = −<i>p</i><sub>外</sub>(<i>V</i>₂ − <i>V</i>₁) = −<i>p</i><sub>外</sub><i>ΔV</i>',
+ cond:'外压恒定',
+ vars:[['<i>p</i><sub>外</sub>','恒定外压']],
+ note:'膨胀时 <i>W</i> < 0，压缩时 <i>W</i> > 0。'},
+
+{topic:'C · 过程功热',title:'理想气体等温可逆体积功',
+ expr:'<i>W</i> = −<i>nRT</i> ln(<i>V</i>₂/<i>V</i>₁) = −<i>nRT</i> ln(<i>p</i>₁/<i>p</i>₂)',
+ cond:'理想气体、等温、可逆',
+ vars:[['<i>n</i>','物质的量 / mol'],['<i>R</i>','8.314 J·K⁻¹·mol⁻¹']],
+ note:'等温可逆做功的绝对值在所有等温过程里最大。'},
+
+{topic:'C · 过程功热',title:'向真空自由膨胀',
+ expr:'<i>W</i> = 0，<i>Q</i> = 0，<i>ΔU</i> = 0',
+ cond:'理想气体、绝热、向真空膨胀',
+ vars:[],
+ note:'<i>T</i> 不变，<i>U</i> 不变，但这是典型的不可逆过程（做功最少）。'},
+
+{topic:'C · 过程功热',title:'等容过程',
+ expr:'<i>W</i> = 0，<i>Q</i><sub>V</sub> = <i>ΔU</i> = <i>nC</i><sub>V,m</sub><i>ΔT</i>',
+ cond:'理想气体、等容',
+ vars:[],
+ note:'压力随温度按 <i>p</i>/<i>T</i> = 常数 变化。'},
+
+{topic:'C · 过程功热',title:'等压过程',
+ expr:'<i>W</i> = −<i>nRΔT</i>，<i>Q</i><sub>p</sub> = <i>ΔH</i> = <i>nC</i><sub>p,m</sub><i>ΔT</i>',
+ cond:'理想气体、等压',
+ vars:[],
+ note:'<i>V</i>/<i>T</i> = 常数；<i>W</i> = <i>ΔU</i> − <i>ΔH</i> = −<i>nRΔT</i>，可用来验算。'},
+
+{topic:'C · 过程功热',title:'绝热过程的功',
+ expr:'<i>W</i> = <i>ΔU</i> = <i>nC</i><sub>V,m</sub>(<i>T</i>₂ − <i>T</i>₁)',
+ cond:'理想气体、绝热（可逆或不可逆都成立）',
+ vars:[],
+ note:'绝热时 <i>Q</i> = 0，能量守恒直接给出 <i>W</i> = <i>ΔU</i>。'},
+
+{topic:'C · 过程功热',title:'绝热恒外压（不可逆）',
+ expr:'−<i>p</i><sub>外</sub>(<i>V</i>₂ − <i>V</i>₁) = <i>nC</i><sub>V,m</sub>(<i>T</i>₂ − <i>T</i>₁)',
+ cond:'理想气体、绝热、外压恒定',
+ vars:[],
+ note:'与 <i>p</i>₂<i>V</i>₂ = <i>nRT</i>₂ 联立解出 <i>T</i>₂、<i>V</i>₂、<i>p</i>₂。不能用 <i>pV</i><sup><i>γ</i></sup> = 常数。'},
+
+{topic:'C · 过程功热',title:'可逆过程功的通式',
+ expr:'<i>W</i> = −∫<i>p</i> d<i>V</i>',
+ cond:'可逆过程，<i>p</i> 为系统压力',
+ vars:[],
+ note:'知道过程方程 <i>p</i>(<i>V</i>) 就能积分；等温、绝热都从这一式出发。'},
+
+/* ---------- D. 绝热可逆过程方程（3 条） ---------- */
+{topic:'D · 绝热可逆',title:'绝热可逆过程方程（<i>p</i>-<i>V</i>）',
+ expr:'<i>pV</i><sup><i>γ</i></sup> = 常数',
+ cond:'理想气体、绝热、可逆（三个条件同时满足）',
+ vars:[['<i>γ</i>','<i>C</i><sub>p,m</sub>/<i>C</i><sub>V,m</sub>']],
+ note:'绝热不可逆过程不能用这个式子！'},
+
+{topic:'D · 绝热可逆',title:'绝热可逆过程方程（<i>T</i>-<i>V</i>）',
+ expr:'<i>TV</i><sup><i>γ</i>−1</sup> = 常数',
+ cond:'理想气体、绝热、可逆',
+ vars:[],
+ note:'由 <i>pV</i><sup><i>γ</i></sup> = <i>C</i> 与 <i>pV</i> = <i>nRT</i> 联立消去 <i>p</i> 得到。'},
+
+{topic:'D · 绝热可逆',title:'绝热可逆过程方程（<i>T</i>-<i>p</i>）',
+ expr:'<i>T</i><sup><i>γ</i></sup><i>p</i><sup>1−<i>γ</i></sup> = 常数',
+ cond:'理想气体、绝热、可逆',
+ vars:[],
+ note:'由 <i>pV</i><sup><i>γ</i></sup> = <i>C</i> 与 <i>pV</i> = <i>nRT</i> 联立消去 <i>V</i> 得到。'},
+
+/* ---------- E. 热化学（5 条） ---------- */
+{topic:'E · 热化学',title:'反应进度',
+ expr:'<i>ξ</i> = Δ<i>n</i><sub>B</sub> / <i>ν</i><sub>B</sub>',
+ cond:'化学反应',
+ vars:[['<i>ν</i><sub>B</sub>','化学计量数，产物为正、反应物为负']],
+ note:'<i>ξ</i> 单位 mol，与选哪个物质无关。'},
+
+{topic:'E · 热化学',title:'由标准摩尔生成焓求标准摩尔反应焓变',
+ expr:'<i>Δ</i><sub>r</sub><i>H</i><sub>m</sub><sup>°</sup> = Σ<i>ν</i><sub>B</sub><i>Δ</i><sub>f</sub><i>H</i><sub>m</sub><sup>°</sup>(B)',
+ cond:'标准态、298.15 K 数据',
+ vars:[['<i>Δ</i><sub>f</sub><i>H</i><sub>m</sub><sup>°</sup>','标准摩尔生成焓']],
+ note:'规定最稳定单质的 <i>Δ</i><sub>f</sub><i>H</i><sub>m</sub><sup>°</sup> = 0。'},
+
+{topic:'E · 热化学',title:'由标准摩尔燃烧焓求标准摩尔反应焓变',
+ expr:'<i>Δ</i><sub>r</sub><i>H</i><sub>m</sub><sup>°</sup> = −Σ<i>ν</i><sub>B</sub><i>Δ</i><sub>c</sub><i>H</i><sub>m</sub><sup>°</sup>(B)',
+ cond:'标准态、298.15 K 数据',
+ vars:[['<i>Δ</i><sub>c</sub><i>H</i><sub>m</sub><sup>°</sup>','标准摩尔燃烧焓']],
+ note:'注意公式前面的负号，这是最常漏的地方。'},
+
+{topic:'E · 热化学',title:'基尔霍夫定律',
+ expr:'<i>ΔH</i>(<i>T</i>₂) = <i>ΔH</i>(<i>T</i>₁) + ∫<sub><i>T</i>₁</sub><sup><i>T</i>₂</sup><i>ΔC</i><sub>p</sub> d<i>T</i>',
+ cond:'反应物、产物在所涉温区内无相变',
+ vars:[['<i>ΔC</i><sub>p</sub>','Σ<i>ν</i><sub>B</sub><i>C</i><sub>p,m</sub>(B)，产物减反应物']],
+ note:'<i>ΔC</i><sub>p</sub> 为常数时简化为 <i>ΔH</i>(<i>T</i>₂) = <i>ΔH</i>(<i>T</i>₁) + <i>ΔC</i><sub>p</sub>(<i>T</i>₂ − <i>T</i>₁)。'},
+
+{topic:'E · 热化学',title:'标准摩尔反应焓变与标准摩尔反应热力学能变',
+ expr:'<i>Δ</i><sub>r</sub><i>H</i><sub>m</sub><sup>°</sup> = <i>Δ</i><sub>r</sub><i>U</i><sub>m</sub><sup>°</sup> + <i>Δ</i><sub>r</sub>(<i>pV</i>) ≈ <i>Δ</i><sub>r</sub><i>U</i><sub>m</sub><sup>°</sup> + Δ<i>n</i>(g)<i>RT</i>',
+ cond:'反应物、产物均在标准态，气体视为理想气体',
+ vars:[['Δ<i>n</i>(g)','气体产物总系数 − 气体反应物总系数']],
+ note:'凝聚相体积变化可忽略，故只计气体摩尔数的变化。'},
+
+/* ---------- F. 焦耳–汤姆孙效应（3 条） ---------- */
+{topic:'F · 节流膨胀',title:'焦耳–汤姆孙系数',
+ expr:'<i>μ</i><sub>J-T</sub> = (∂<i>T</i>/∂<i>p</i>)<sub>H</sub>',
+ cond:'节流膨胀（等焓过程）',
+ vars:[['<i>μ</i><sub>J-T</sub>','> 0 致冷，< 0 致热，= 0 温度不变']],
+ note:'这是衡量真实气体节流后温度变化方向的量。'},
+
+{topic:'F · 节流膨胀',title:'节流膨胀的等焓性',
+ expr:'<i>ΔH</i> = 0',
+ cond:'节流膨胀（绝热、稳定流动）',
+ vars:[],
+ note:'节流前后焓相等，但压力降低、体积增大、温度可能变化。'},
+
+{topic:'F · 节流膨胀',title:'理想气体的节流',
+ expr:'<i>μ</i><sub>J-T</sub> = 0',
+ cond:'理想气体',
+ vars:[],
+ note:'理想气体节流后温度不变（焦耳实验的推论）。'},
+
+/* ---------- G. 化学反应（2 条） ---------- */
+{topic:'G · 化学反应',title:'等温等容化学反应',
+ expr:'<i>Q</i> = <i>Q</i><sub>V</sub> = <i>Δ</i><sub>r</sub><i>U</i><sub>m</sub><br><i>W</i> = 0<br><i>Δ</i><sub>r</sub><i>H</i><sub>m</sub> = <i>Δ</i><sub>r</sub><i>U</i><sub>m</sub> + <i>Δ</i><sub>r</sub>(<i>pV</i>) = <i>Δ</i><sub>r</sub><i>U</i><sub>m</sub> + <i>VΔ</i><sub>r</sub><i>p</i>',
+ cond:'封闭系统、等温等容、<i>W</i>′ = 0（<i>W</i>′ 为非体积功，如弹式量热计）',
+ vars:[['<i>Q</i><sub>V</sub>','等容反应热'],['<i>Δ</i><sub>r</sub><i>U</i><sub>m</sub>','标准摩尔反应热力学能变'],['<i>Δ</i><sub>r</sub><i>H</i><sub>m</sub>','标准摩尔反应焓变'],['<i>Δ</i><sub>r</sub><i>p</i>','反应引起的压力变化']],
+ note:'等容反应无体积功，<i>Q</i><sub>V</sub> 直接等于 <i>Δ</i><sub>r</sub><i>U</i><sub>m</sub>；焓变需用 <i>Δ</i><sub>r</sub><i>H</i><sub>m</sub> = <i>Δ</i><sub>r</sub><i>U</i><sub>m</sub> + <i>Δ</i><sub>r</sub>(<i>pV</i>) 换算。理想气体时可写成 <i>Δ</i><sub>r</sub><i>H</i><sub>m</sub> = <i>Δ</i><sub>r</sub><i>U</i><sub>m</sub> + <i>RTΔ</i><sub>r</sub><i>n</i>(g)。'},
+
+{topic:'G · 化学反应',title:'等温等压化学反应',
+ expr:'<i>Q</i> = <i>Q</i><sub>p</sub> = <i>Δ</i><sub>r</sub><i>H</i><sub>m</sub><br><i>W</i> = −<i>p</i><sub>外</sub><i>ΔV</i><br><i>Δ</i><sub>r</sub><i>U</i><sub>m</sub> = <i>Q</i> + <i>W</i> = <i>Δ</i><sub>r</sub><i>H</i><sub>m</sub> − <i>p</i><sub>外</sub><i>ΔV</i>',
+ cond:'封闭系统、等温等压、<i>W</i>′ = 0（如烧杯中的反应）',
+ vars:[['<i>Q</i><sub>p</sub>','等压反应热'],['<i>Δ</i><sub>r</sub><i>H</i><sub>m</sub>','标准摩尔反应焓变'],['<i>ΔV</i>','反应前后体积变化']],
+ note:'等压反应热直接等于焓变；求 <i>Δ</i><sub>r</sub><i>U</i><sub>m</sub> 时要扣掉体积功，气体反应 <i>ΔV</i> ≈ Δ<i>n</i>(g)<i>RT</i>/<i>p</i>，故 <i>Δ</i><sub>r</sub><i>U</i><sub>m</sub> ≈ <i>Δ</i><sub>r</sub><i>H</i><sub>m</sub> − Δ<i>n</i>(g)<i>RT</i>。'},
+
+/* ---------- H. 相变（2 条） ---------- */
+{topic:'H · 相变过程',title:'可逆相变（等温等压）',
+ expr:'<i>Q</i> = <i>Q</i><sub>p</sub> = <i>ΔH</i><sub>相变</sub><br><i>W</i> = −<i>p</i><sub>外</sub><i>ΔV</i> = −<i>pΔV</i><br><i>ΔU</i> = <i>Q</i> + <i>W</i> = <i>ΔH</i><sub>相变</sub> − <i>pΔV</i>',
+ cond:'纯物质在相平衡温度下发生（如 100 °C 水沸腾、0 °C 冰融化）、等温等压、<i>W</i>′ = 0',
+ vars:[['<i>ΔH</i><sub>相变</sub>','相变焓，如 <i>Δ</i><sub>vap</sub><i>H</i><sub>m</sub>、<i>Δ</i><sub>fus</sub><i>H</i><sub>m</sub>'],['<i>ΔV</i>','相变前后体积变化']],
+ note:'可逆相变的 <i>Q</i><sub>p</sub> 直接等于相变焓。凝聚相之间 <i>ΔV</i> ≈ 0，<i>ΔU</i> ≈ <i>ΔH</i>；有气体生成时 <i>ΔV</i> ≈ <i>nRT</i>/<i>p</i>，<i>W</i> ≈ −<i>nRT</i>。'},
+
+{topic:'H · 相变过程',title:'不可逆相变（等温等压）',
+ expr:'<i>Q</i> = <i>Q</i><sub>p</sub> ≠ <i>ΔH</i><sub>相变</sub><br><i>W</i> = −<i>p</i><sub>外</sub><i>ΔV</i><br><i>ΔU</i> = <i>Q</i> + <i>W</i>',
+ cond:'等温等压，但不在相平衡温度下发生（如过冷水结冰、过热水暴沸）、<i>W</i>′ = 0',
+ vars:[['<i>ΔH</i><sub>相变</sub>','相平衡温度下的相变焓'],['<i>Q</i><sub>p</sub>','实际过程的等压热']],
+ note:'不可逆相变的 <i>Q</i><sub>p</sub> 等于实际过程的焓变，但不等于相平衡温度下的 <i>ΔH</i><sub>相变</sub>；<i>ΔH</i> 需设计可逆途径另行计算，<i>ΔU</i> 则用 <i>ΔU</i> = <i>Q</i> + <i>W</i> 求。'}
+];
+
+/* ==================== 2. 过程速判数据（11 条） ==================== */
+const PROCESSES = [
+{name:'等温可逆',
+ detail:'理想气体，<i>T</i> 不变，<i>p</i><sub>外</sub> = <i>p</i>，<i>pV</i> = 常数',
+ dU:'0', dH:'0',
+ Q:'<i>Q</i> = −<i>W</i> = <i>nRT</i> ln(<i>V</i>₂/<i>V</i>₁)',
+ W:'<i>W</i> = −<i>nRT</i> ln(<i>V</i>₂/<i>V</i>₁) = −<i>nRT</i> ln(<i>p</i>₁/<i>p</i>₂)',
+ note:'膨胀时 <i>Q</i> > 0、<i>W</i> < 0，热由环境流入系统，全部转化为对外做的功。'},
+
+{name:'等温恒外压（不可逆）',
+ detail:'理想气体，<i>T</i> 不变，外压恒定为 <i>p</i><sub>外</sub>',
+ dU:'0', dH:'0',
+ Q:'<i>Q</i> = <i>p</i><sub>外</sub>(<i>V</i>₂ − <i>V</i>₁)',
+ W:'<i>W</i> = −<i>p</i><sub>外</sub>(<i>V</i>₂ − <i>V</i>₁)',
+ note:'等温过程 <i>ΔU</i> 恒为 0，所以 <i>Q</i> = −<i>W</i> 永远成立；但 |<i>W</i>| 比等温可逆小。'},
+
+{name:'向真空自由膨胀',
+ detail:'理想气体绝热，<i>p</i><sub>外</sub> = 0',
+ dU:'0（因 <i>Q</i> = 0、<i>W</i> = 0）', dH:'0',
+ Q:'0', W:'0',
+ note:'<i>T</i> 不变、<i>U</i> 不变，但这是典型的不可逆过程（做功最少的一种）。'},
+
+{name:'等容变温',
+ detail:'理想气体，<i>V</i> 不变，<i>W</i> = 0',
+ dU:'<i>nC</i><sub>V,m</sub>(<i>T</i>₂ − <i>T</i>₁)', dH:'<i>nC</i><sub>p,m</sub>(<i>T</i>₂ − <i>T</i>₁)',
+ Q:'<i>Q</i><sub>V</sub> = <i>ΔU</i>', W:'0',
+ note:'压力随温度按 <i>p</i>/<i>T</i> = 常数 变化。'},
+
+{name:'等压变温',
+ detail:'理想气体，<i>p</i> 不变',
+ dU:'<i>nC</i><sub>V,m</sub>(<i>T</i>₂ − <i>T</i>₁)', dH:'<i>nC</i><sub>p,m</sub>(<i>T</i>₂ − <i>T</i>₁)',
+ Q:'<i>Q</i><sub>p</sub> = <i>ΔH</i>', W:'<i>W</i> = −<i>pΔV</i> = −<i>nRΔT</i>',
+ note:'<i>V</i>/<i>T</i> = 常数；<i>W</i> = <i>ΔU</i> − <i>ΔH</i> = −<i>nRΔT</i>，可用来验算。'},
+
+{name:'绝热可逆',
+ detail:'理想气体，<i>Q</i> = 0，且过程可逆',
+ dU:'<i>nC</i><sub>V,m</sub>(<i>T</i>₂ − <i>T</i>₁)', dH:'<i>nC</i><sub>p,m</sub>(<i>T</i>₂ − <i>T</i>₁)',
+ Q:'0', W:'<i>W</i> = <i>ΔU</i> = <i>nC</i><sub>V,m</sub>(<i>T</i>₂ − <i>T</i>₁)',
+ note:'配合 <i>pV</i><sup><i>γ</i></sup> = 常数、<i>TV</i><sup><i>γ</i>−1</sup> = 常数 可求 <i>T</i>₂、<i>V</i>₂、<i>p</i>₂。'},
+
+{name:'绝热恒外压（不可逆）',
+ detail:'理想气体，<i>Q</i> = 0，外压恒定为 <i>p</i><sub>外</sub>',
+ dU:'<i>nC</i><sub>V,m</sub>(<i>T</i>₂ − <i>T</i>₁)', dH:'<i>nC</i><sub>p,m</sub>(<i>T</i>₂ − <i>T</i>₁)',
+ Q:'0', W:'<i>W</i> = <i>ΔU</i> = −<i>p</i><sub>外</sub>(<i>V</i>₂ − <i>V</i>₁)',
+ note:'用 −<i>p</i><sub>外</sub>(<i>V</i>₂ − <i>V</i>₁) = <i>nC</i><sub>V,m</sub>(<i>T</i>₂ − <i>T</i>₁) 联立 <i>p</i>₂<i>V</i>₂ = <i>nRT</i>₂ 解出 <i>T</i>₂。'},
+
+{name:'可逆相变（等温等压）',
+ detail:'纯物质在相平衡温度下发生，如 373 K、101.325 kPa 下水汽化',
+ dU:'<i>ΔU</i> = <i>ΔH</i><sub>相变</sub> − <i>pΔV</i>', dH:'<i>Q</i><sub>p</sub> = <i>ΔH</i><sub>相变</sub>',
+ Q:'<i>Q</i><sub>p</sub> = <i>ΔH</i><sub>相变</sub>', W:'<i>W</i> = −<i>pΔV</i>',
+ note:'凝聚相之间 <i>ΔU</i> ≈ <i>ΔH</i>；有气体生成时 <i>ΔV</i> ≈ <i>nRT</i>/<i>p</i>，<i>W</i> ≈ −<i>nRT</i>，<i>ΔU</i> ≈ <i>ΔH</i> − <i>nRT</i>。'},
+
+{name:'不可逆相变（等温等压）',
+ detail:'不在相平衡温度下发生，如 −10 °C、101.325 kPa 下过冷水结冰',
+ dU:'<i>ΔU</i> = <i>Q</i> + <i>W</i>', dH:'<i>ΔH</i> 需另设可逆途径计算',
+ Q:'<i>Q</i> = <i>Q</i><sub>p</sub> = <i>ΔH</i><sub>实际</sub> ≠ <i>ΔH</i><sub>相变</sub>', W:'<i>W</i> = −<i>p</i><sub>外</sub><i>ΔV</i>',
+ note:'<i>Q</i><sub>p</sub> 等于实际过程的焓变，但不等于相平衡温度下的相变焓；<i>ΔU</i> 直接由 <i>ΔU</i> = <i>Q</i> + <i>W</i> 求。'},
+
+{name:'等温等容化学反应',
+ detail:'封闭系统、等温等容，如弹式量热计中的燃烧反应',
+ dU:'<i>Δ</i><sub>r</sub><i>U</i><sub>m</sub> = <i>Q</i><sub>V</sub>', dH:'<i>Δ</i><sub>r</sub><i>H</i><sub>m</sub> = <i>Δ</i><sub>r</sub><i>U</i><sub>m</sub> + <i>Δ</i><sub>r</sub>(<i>pV</i>)',
+ Q:'<i>Q</i> = <i>Q</i><sub>V</sub> = <i>Δ</i><sub>r</sub><i>U</i><sub>m</sub>', W:'<i>W</i> = 0',
+ note:'等容无体积功；理想气体时 <i>Δ</i><sub>r</sub>(<i>pV</i>) = <i>RTΔ</i><sub>r</sub><i>n</i>(g)，故 <i>Δ</i><sub>r</sub><i>H</i><sub>m</sub> = <i>Δ</i><sub>r</sub><i>U</i><sub>m</sub> + <i>RTΔ</i><sub>r</sub><i>n</i>(g)。'},
+
+{name:'等温等压化学反应',
+ detail:'封闭系统、等温等压，如烧杯中的溶液反应',
+ dU:'<i>Δ</i><sub>r</sub><i>U</i><sub>m</sub> = <i>Q</i> + <i>W</i> = <i>Δ</i><sub>r</sub><i>H</i><sub>m</sub> − <i>p</i><sub>外</sub><i>ΔV</i>', dH:'<i>Δ</i><sub>r</sub><i>H</i><sub>m</sub> = <i>Q</i><sub>p</sub>',
+ Q:'<i>Q</i> = <i>Q</i><sub>p</sub> = <i>Δ</i><sub>r</sub><i>H</i><sub>m</sub>', W:'<i>W</i> = −<i>p</i><sub>外</sub><i>ΔV</i>',
+ note:'等压反应热等于焓变；求 <i>Δ</i><sub>r</sub><i>U</i><sub>m</sub> 时要扣掉体积功，气体反应 <i>Δ</i><sub>r</sub><i>U</i><sub>m</sub> ≈ <i>Δ</i><sub>r</sub><i>H</i><sub>m</sub> − Δ<i>n</i>(g)<i>RT</i>。'}
+];
+
+/* ==================== 3. 记忆卡数据（22 题） ==================== */
+const QUIZ = [
+{q:'热力学第一定律的数学表达式是什么？',a:'<i>ΔU</i> = <i>Q</i> + <i>W</i>（<i>W</i> 为环境对系统做功）'},
+{q:'恒压且不做非体积功时，<i>Q</i> 等于哪个状态函数的改变量？',a:'<i>Q</i><sub>p</sub> = <i>ΔH</i>'},
+{q:'恒容且不做非体积功时，<i>Q</i> 等于哪个状态函数的改变量？',a:'<i>Q</i><sub>V</sub> = <i>ΔU</i>'},
+{q:'焓的定义式是什么？',a:'<i>H</i> = <i>U</i> + <i>pV</i>，<i>ΔH</i> = <i>ΔU</i> + Δ(<i>pV</i>)'},
+{q:'理想气体等温可逆膨胀的功怎么算？',a:'<i>W</i> = −<i>nRT</i> ln(<i>V</i>₂/<i>V</i>₁) = −<i>nRT</i> ln(<i>p</i>₁/<i>p</i>₂)'},
+{q:'理想气体等温过程，<i>ΔU</i> 和 <i>ΔH</i> 各等于多少？',a:'<i>ΔU</i> = 0，<i>ΔH</i> = 0'},
+{q:'理想气体等温可逆膨胀，<i>Q</i> 与 <i>W</i> 是什么关系？',a:'<i>Q</i> = −<i>W</i>（数值相等、符号相反）'},
+{q:'理想气体 <i>ΔU</i> 和 <i>ΔH</i> 的通式分别是什么？',a:'<i>ΔU</i> = <i>nC</i><sub>V,m</sub><i>ΔT</i>，<i>ΔH</i> = <i>nC</i><sub>p,m</sub><i>ΔT</i>（热容视为常数）'},
+{q:'理想气体 <i>C</i><sub>p,m</sub> − <i>C</i><sub>V,m</sub> 等于多少？',a:'<i>R</i>（迈耶公式）'},
+{q:'理想气体绝热可逆过程方程（三个）？',a:'<i>pV</i><sup><i>γ</i></sup> = <i>C</i>，<i>TV</i><sup><i>γ</i>−1</sup> = <i>C</i>，<i>T</i><sup><i>γ</i></sup><i>p</i><sup>1−<i>γ</i></sup> = <i>C</i>'},
+{q:'绝热过程的功怎么算？',a:'<i>W</i> = <i>ΔU</i> = <i>nC</i><sub>V,m</sub>(<i>T</i>₂ − <i>T</i>₁)（可逆不可逆都适用）'},
+{q:'绝热恒外压不可逆过程，求 <i>T</i>₂ 用哪个方程？',a:'−<i>p</i><sub>外</sub>(<i>V</i>₂ − <i>V</i>₁) = <i>nC</i><sub>V,m</sub>(<i>T</i>₂ − <i>T</i>₁)，与 <i>p</i>₂<i>V</i>₂ = <i>nRT</i>₂ 联立'},
+{q:'由标准摩尔生成焓求标准摩尔反应焓变的公式？',a:'<i>Δ</i><sub>r</sub><i>H</i><sub>m</sub><sup>°</sup> = Σ<i>ν</i><sub>B</sub><i>Δ</i><sub>f</sub><i>H</i><sub>m</sub><sup>°</sup>(B)'},
+{q:'由标准摩尔燃烧焓求标准摩尔反应焓变的公式？',a:'<i>Δ</i><sub>r</sub><i>H</i><sub>m</sub><sup>°</sup> = −Σ<i>ν</i><sub>B</sub><i>Δ</i><sub>c</sub><i>H</i><sub>m</sub><sup>°</sup>(B)（注意负号）'},
+{q:'基尔霍夫定律怎么写？',a:'<i>ΔH</i>(<i>T</i>₂) = <i>ΔH</i>(<i>T</i>₁) + ∫<i>ΔC</i><sub>p</sub>d<i>T</i>；<i>ΔC</i><sub>p</sub> 为常数时 = <i>ΔH</i>(<i>T</i>₁) + <i>ΔC</i><sub>p</sub>(<i>T</i>₂−<i>T</i>₁)'},
+{q:'标准摩尔反应焓变与标准摩尔反应热力学能变的关系式？',a:'<i>Δ</i><sub>r</sub><i>H</i><sub>m</sub><sup>°</sup> = <i>Δ</i><sub>r</sub><i>U</i><sub>m</sub><sup>°</sup> + Δ<i>n</i>(g)<i>RT</i>'},
+{q:'焦耳–汤姆孙系数的定义式？理想气体等于多少？',a:'<i>μ</i><sub>J-T</sub> = (∂<i>T</i>/∂<i>p</i>)<sub>H</sub>；理想气体 <i>μ</i><sub>J-T</sub> = 0'},
+{q:'节流膨胀过程哪个状态函数不变？',a:'<i>ΔH</i> = 0（等焓过程）'},
+{q:'等温等容化学反应，<i>Q</i> 和 <i>W</i> 分别等于什么？',a:'<i>Q</i> = <i>Q</i><sub>V</sub> = <i>Δ</i><sub>r</sub><i>U</i><sub>m</sub>；<i>W</i> = 0（无体积功）'},
+{q:'等温等压化学反应，<i>Q</i> 和 <i>W</i> 分别等于什么？',a:'<i>Q</i> = <i>Q</i><sub>p</sub> = <i>Δ</i><sub>r</sub><i>H</i><sub>m</sub>；<i>W</i> = −<i>p</i><sub>外</sub><i>ΔV</i>'},
+{q:'可逆相变中 <i>Q</i><sub>p</sub> 与 <i>ΔH</i><sub>相变</sub> 的关系？',a:'<i>Q</i><sub>p</sub> = <i>ΔH</i><sub>相变</sub>（直接相等）'},
+{q:'不可逆相变中 <i>Q</i><sub>p</sub> 与 <i>ΔH</i><sub>相变</sub> 的关系？',a:'<i>Q</i><sub>p</sub> ≠ <i>ΔH</i><sub>相变</sub>（<i>Q</i><sub>p</sub> 为实际过程热效应，<i>ΔH</i> 需另设可逆途径算）'}
+];
+
+/* ==================== 4. 标签切换 ==================== */
+document.querySelectorAll('nav button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b === btn));
+    document.querySelectorAll('main section').forEach(s =>
+      s.classList.toggle('on', s.id === btn.dataset.tab));
+  });
+});
+
+/* ==================== 5. 公式卡片（按 topic 分组显示） ==================== */
+const stripTags = s => String(s).replace(/<[^>]+>/g, '');
+
+function renderCards(kw) {
+  const key = (kw || '').trim().toLowerCase();
+  const list = FORMULAS.filter(f => {
+    if (!key) return true;
+    const blob = stripTags(f.title + f.expr + f.topic + f.cond + (f.note || '') +
+      f.vars.map(v => v.join('')).join('')).toLowerCase();
+    return blob.includes(key);
+  });
+
+  if (!list.length) {
+    document.getElementById('cardList').innerHTML =
+      '<p class="hint">没有匹配的公式，换个关键词试试。</p>';
+    return;
+  }
+
+  const groups = [];
+  const map = {};
+  list.forEach(f => {
+    if (!map[f.topic]) { map[f.topic] = []; groups.push(f.topic); }
+    map[f.topic].push(f);
+  });
+
+  let html = '';
+  groups.forEach(g => {
+    html += `<div class="groupTitle">${g}</div>`;
+    html += map[g].map(f => `
+      <div class="card">
+        <h3>${f.title}</h3>
+        <div class="expr">${f.expr}</div>
+        <div class="cond">适用条件：${f.cond}</div>
+        ${f.vars.length ? `<ul class="vars">${f.vars.map(v =>
+          `<li><b>${v[0]}</b> — ${v[1]}</li>`).join('')}</ul>` : ''}
+        ${f.note ? `<div class="hint">💡 ${f.note}</div>` : ''}
+      </div>`).join('');
+  });
+  document.getElementById('cardList').innerHTML = html;
+}
+
+document.getElementById('q').addEventListener('input', e => renderCards(e.target.value));
+
+/* ==================== 6. 过程速判 ==================== */
+let procIdx = 0;
+
+function renderProcPills() {
+  document.getElementById('procPills').innerHTML = PROCESSES.map((p, i) =>
+    `<span class="pill${i === procIdx ? ' on' : ''}" data-i="${i}">${p.name}</span>`).join('');
+}
+
+function renderProc() {
+  const p = PROCESSES[procIdx];
+  document.getElementById('procResult').innerHTML = `
+    <div class="card">
+      <h3>${p.name}</h3>
+      <div class="hint">${p.detail}</div>
+      <table style="margin-top:10px">
+        <tr><th>物理量</th><th>表达式</th></tr>
+        <tr><td class="k"><i>ΔU</i></td><td>${p.dU}</td></tr>
+        <tr><td class="k"><i>ΔH</i></td><td>${p.dH}</td></tr>
+        <tr><td class="k"><i>Q</i></td><td>${p.Q}</td></tr>
+        <tr><td class="k"><i>W</i></td><td>${p.W}</td></tr>
+      </table>
+      <div class="hint">💡 ${p.note}</div>
+    </div>`;
+}
+
+document.getElementById('procPills').addEventListener('click', e => {
+  const t = e.target.closest('.pill');
+  if (!t) return;
+  procIdx = +t.dataset.i;
+  renderProcPills();
+  renderProc();
+});
+
+/* ==================== 7. 记忆卡 ==================== */
+let quizOrder = QUIZ.map((_, i) => i);
+let quizPtr = 0;
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function renderQuiz() {
+  const item = QUIZ[quizOrder[quizPtr]];
+  const card = document.getElementById('quizCard');
+  card.innerHTML = `<div class="q">${item.q}</div><div class="a">${item.a}</div>`;
+  card.classList.remove('show');
+  document.getElementById('quizPos').textContent = `第 ${quizPtr + 1} / ${QUIZ.length} 题`;
+}
+
+document.getElementById('quizShow').onclick = () =>
+  document.getElementById('quizCard').classList.add('show');
+
+document.getElementById('quizNext').onclick = () => {
+  quizPtr = (quizPtr + 1) % quizOrder.length;
+  renderQuiz();
+};
+
+document.getElementById('quizShuffle').onclick = () => {
+  shuffle(quizOrder);
+  quizPtr = 0;
+  renderQuiz();
+};
+
+/* ==================== 8. 启动 ==================== */
+renderCards('');
+renderProcPills();
+renderProc();
+renderQuiz();
+</script>
+</body>
+</html>
